@@ -1,0 +1,122 @@
+configuration:
+  pageTitle: "L4P 剪藏馆"
+  pageTitleSuffix: ""
+  enableSPA: true
+  enablePopovers: true
+  analytics: null
+  locale: zh-CN
+  baseUrl: l4place0.github.io/web-clips-publish
+  ignorePatterns: []
+  defaultDateType: modified
+  theme:
+    fontOrigin: local
+    cdnCaching: false
+    typography:
+      header: "system-ui"
+      body: "system-ui"
+      code: "ui-monospace"
+    colors:
+      lightMode:
+        light: "#faf9f7"
+        lightgray: "#e8e5df"
+        gray: "#b7b0a5"
+        darkgray: "#4b4640"
+        dark: "#231f1b"
+        secondary: "#356a70"
+        tertiary: "#8b6249"
+        highlight: "rgba(53, 106, 112, 0.14)"
+        textHighlight: "#f4df7a66"
+      darkMode:
+        light: "#171817"
+        lightgray: "#303331"
+        gray: "#656a66"
+        darkgray: "#d1d4d0"
+        dark: "#f1f2ef"
+        secondary: "#8bc0c4"
+        tertiary: "#d4a17d"
+        highlight: "rgba(139, 192, 196, 0.16)"
+        textHighlight: "#b49b3f55"
+
+plugins:
+  - source: github:quartz-community/note-properties
+    enabled: true
+    options:
+      includeAll: false
+      includedProperties:
+        - description
+        - tags
+        - aliases
+      excludedProperties: []
+    order: 5
+  - source: github:quartz-community/obsidian-flavored-markdown
+    enabled: true
+    options:
+      enableInHtmlEmbed: false
+      enableCheckbox: true
+    order: 30
+  - source: github:quartz-community/github-flavored-markdown
+    enabled: true
+    order: 40
+  - source: github:quartz-community/table-of-contents
+    enabled: true
+    order: 50
+    layout:
+      position: right
+      priority: 50
+  - source: github:quartz-community/description
+    enabled: true
+    order: 70
+  - source: github:quartz-community/content-index
+    enabled: true
+    options:
+      enableSiteMap: false
+      enableRSS: false
+  - source: github:quartz-community/content-page
+    enabled: true
+  - source: github:quartz-community/tag-page
+    enabled: true
+  - source: github:quartz-community/search
+    enabled: true
+    layout:
+      position: left
+      priority: 20
+      group: toolbar
+      groupOptions:
+        grow: true
+  - source: github:quartz-community/article-title
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 10
+  - source: github:quartz-community/tag-list
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 30
+  - source: github:quartz-community/page-title
+    enabled: true
+    layout:
+      position: left
+      priority: 10
+  - source: github:quartz-community/darkmode
+    enabled: true
+    layout:
+      position: left
+      priority: 30
+      group: toolbar
+  - source: github:quartz-community/breadcrumbs
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 5
+      condition: not-index
+  - source: github:quartz-community/footer
+    enabled: true
+    options:
+      links: {}
+
+layout:
+  byPageType:
+    tag:
+      positions:
+        right: []

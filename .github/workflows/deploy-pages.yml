@@ -1,0 +1,128 @@
+name: Deploy web clips
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even if this content SHA was already deployed
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.decision.outputs.changed }}
+      content_sha: ${{ steps.content.outputs.sha }}
+    steps:
+      - name: Checkout display repository
+        uses: actions/checkout@v6
+
+      - name: Resolve content commit
+        id: content
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git ls-remote https://github.com/l4place0/web-clips.git refs/heads/main | cut -f1)"
+          test "${#sha}" -eq 40
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Check successful-deployment marker
+        id: deployed
+        uses: actions/cache/restore@v5
+        with:
+          path: .deployed-sha
+          key: web-clips-deployed-${{ steps.content.outputs.sha }}
+
+      - name: Decide whether to build
+        id: decision
+        shell: bash
+        env:
+          FORCE_BUILD: ${{ inputs.force || false }}
+          CACHE_HIT: ${{ steps.deployed.outputs.cache-hit }}
+        run: |
+          if [[ "$FORCE_BUILD" == "true" || "$CACHE_HIT" != "true" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout fixed content commit
+        if: steps.decision.outputs.changed == 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: l4place0/web-clips
+          ref: ${{ steps.content.outputs.sha }}
+          path: content-source
+          persist-credentials: false
+
+      - name: Set up Node.js
+        if: steps.decision.outputs.changed == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.14.x
+          cache: npm
+
+      - name: Install display dependencies
+        if: steps.decision.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Test display adapter
+        if: steps.decision.outputs.changed == 'true'
+        env:
+          WEB_CLIPS_CONTENT_ROOT: ${{ github.workspace }}/content-source
+        run: npm test
+
+      - name: Build fixed content commit
+        if: steps.decision.outputs.changed == 'true'
+        env:
+          WEB_CLIPS_CONTENT_ROOT: ${{ github.workspace }}/content-source
+          WEB_CLIPS_CONTENT_SHA: ${{ steps.content.outputs.sha }}
+        run: npm run build:site
+
+      - name: Configure GitHub Pages
+        if: steps.decision.outputs.changed == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: steps.decision.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+
+  deploy:
+    if: needs.build.outputs.changed == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Record successful content SHA
+        shell: bash
+        run: |
+          mkdir -p .deployed-sha
+          printf '%s\n' '${{ needs.build.outputs.content_sha }}' > .deployed-sha/content-sha.txt
+
+      - name: Save successful-deployment marker
+        uses: actions/cache/save@v5
+        with:
+          path: .deployed-sha
+          key: web-clips-deployed-${{ needs.build.outputs.content_sha }}
+

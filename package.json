@@ -1,0 +1,39 @@
+{
+  "name": "web-clips-publish",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build:site": "node site/build.mjs",
+    "test:site": "node --test --test-concurrency=1 site/*.test.mjs",
+    "test": "node --test --test-concurrency=1 site/*.test.mjs",
+    "test:mvp": "npm test"
+  },
+  "devDependencies": {
+    "@jackyzha0/quartz": "https://github.com/jackyzha0/quartz/archive/ab346fa66a895e12d63a308e70ce330ba795822a.tar.gz",
+    "@quartz-community/article-title": "0.1.0",
+    "@quartz-community/breadcrumbs": "0.1.0",
+    "@quartz-community/content-index": "0.1.0",
+    "@quartz-community/content-page": "0.1.0",
+    "@quartz-community/darkmode": "0.1.0",
+    "@quartz-community/description": "0.1.0",
+    "@quartz-community/footer": "0.1.0",
+    "@quartz-community/github-flavored-markdown": "0.1.0",
+    "@quartz-community/note-properties": "0.1.0",
+    "@quartz-community/obsidian-flavored-markdown": "0.1.0",
+    "@quartz-community/page-title": "0.1.0",
+    "@quartz-community/search": "0.1.0",
+    "@quartz-community/table-of-contents": "0.1.0",
+    "@quartz-community/tag-list": "0.1.0",
+    "@quartz-community/tag-page": "0.1.0",
+    "@quartz-community/types": "0.2.1",
+    "@quartz-community/utils": "0.1.0"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "engines": {
+    "node": "24.14.x",
+    "npm": ">=11"
+  },
+  "packageManager": "npm@11.11.0"
+}
