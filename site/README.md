@@ -17,7 +17,7 @@ npm.cmd run build:site
 5. 原子替换本仓库的 `public/`。
 
 Quartz 与插件版本由 `package-lock.json` 和 `quartz.lock.json` 固定。GitHub Pages
-项目路径已经写入 `quartz.config.yaml`：`l4place0.github.io/web-clips-publish`。
+项目路径已经写入 `quartz.config.yaml`：`l4place0-cloud.github.io/web-clips-publish`。
 
 媒体迁移后，Markdown 直接引用 `https://assets.l4p.site/...`，展示仓库不复制
 `clips/assets/`。迁移完成前仍保留旧附件旁路复制能力，以便并行验收和回滚。

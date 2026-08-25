@@ -826,6 +826,10 @@ async function processPublishedNote(root, config, note, publishedByPath) {
   const coverField = config.attachments.localImages.frontmatterFields[0]
   const pageDocument = note.parsed.document.clone()
   const rawDocument = note.parsed.document.clone()
+  rawDocument.set(
+    config.frontmatter.publicUrlField,
+    `${config.routes.publicBaseUrl}${config.routes.pagePattern.replace("{rid}", note.rid)}`,
+  )
   if (Object.hasOwn(note.data, coverField)) {
     if (typeof note.data[coverField] !== "string") {
       diagnostics.push(diag("E_ATTACHMENT_TYPE", note.relativePath, { field: coverField, reason: "not-string" }))

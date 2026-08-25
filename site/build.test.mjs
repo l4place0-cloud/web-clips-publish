@@ -14,6 +14,7 @@ const { assignId } = contentPublisher
 
 const RID = "5d3b8f6e-19c4-4c62-9a71-2f0e8d7b6c45"
 const PROJECT_PATH = "/web-clips-publish"
+const PUBLIC_BASE_URL = "https://l4place0-cloud.github.io/web-clips-publish"
 const PRIVATE_SENTINEL = "PRIVATE_SENTINEL_DO_NOT_PUBLISH_9a4f"
 const SEARCH_TERM = "量子剪藏检索词"
 const PNG = Buffer.from(
@@ -64,6 +65,7 @@ test("production pipeline publishes only the staged closure with stable routes",
     `---
 title: 中文公开笔记
 publish: false
+webClipUrl: https://l4place0.github.io/web-clips-publish/r/${RID}
 tags:
   - 中文标签
 ---
@@ -123,6 +125,9 @@ ${PRIVATE_SENTINEL}
   assert.doesNotMatch(page, /%25E[0-9A-F]{1}/i)
   assert.doesNotMatch(page, /permalink:\s*\/r\//)
   assert.match(raw, new RegExp(`permalink: "?/r/${RID}"?`))
+  assert.match(raw, new RegExp(`${PUBLIC_BASE_URL}/r/${RID}`))
+  assert.doesNotMatch(raw, /https:\/\/l4place0\.github\.io\/web-clips-publish/)
+  assert.match(assigned, /https:\/\/l4place0\.github\.io\/web-clips-publish/)
   assert.match(raw, new RegExp(`${PROJECT_PATH}/assets/${RID}/%E5%9B%BE%E7%89%87%20%E7%A9%BA%E6%A0%BC\\.png`))
   assert.match(contentIndex, new RegExp(SEARCH_TERM))
   assert.match(contentIndex, /中文公开笔记/)

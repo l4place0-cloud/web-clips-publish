@@ -5,7 +5,7 @@ configuration:
   enablePopovers: true
   analytics: null
   locale: zh-CN
-  baseUrl: l4place0.github.io/web-clips-publish
+  baseUrl: l4place0-cloud.github.io/web-clips-publish
   ignorePatterns: []
   defaultDateType: modified
   theme:

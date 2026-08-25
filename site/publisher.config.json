@@ -41,7 +41,7 @@
     "reusable": false
   },
   "routes": {
-    "publicBaseUrl": "https://l4place0.github.io/web-clips-publish",
+    "publicBaseUrl": "https://l4place0-cloud.github.io/web-clips-publish",
     "pagePattern": "/r/{rid}",
     "rawPattern": "/raw/{rid}.md",
     "postMvpPdfPattern": "/pdf/{rid}.pdf",

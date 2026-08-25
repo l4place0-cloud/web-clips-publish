@@ -10,7 +10,7 @@
 - Actions 页面支持手动运行；选择 `force` 可强制重建相同 SHA。
 - 构建失败不会登记 SHA，也不会覆盖上一次成功 Pages 部署。
 
-站点地址：<https://l4place0.github.io/web-clips-publish/>
+站点地址：<https://l4place0-cloud.github.io/web-clips-publish/>
 
 ## 本地验证
 
