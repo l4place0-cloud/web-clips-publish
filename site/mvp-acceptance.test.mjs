@@ -3,16 +3,16 @@ import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import test from "node:test"
-import { fileURLToPath, pathToFileURL } from "node:url"
+import { fileURLToPath } from "node:url"
 
 import { buildSite } from "./build.mjs"
+import * as contentPublisher from "./publisher.mjs"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const REPOSITORY_ROOT = path.dirname(HERE)
 const CONTENT_REPO_ROOT = process.env.WEB_CLIPS_CONTENT_ROOT
 if (!CONTENT_REPO_ROOT) throw new Error("WEB_CLIPS_CONTENT_ROOT is required for site tests")
-const SOURCE_CONFIG = path.join(CONTENT_REPO_ROOT, "publishing", "config.json")
-const contentPublisher = await import(pathToFileURL(path.join(CONTENT_REPO_ROOT, "publishing", "publisher.mjs")))
+const SOURCE_CONFIG = path.join(HERE, "publisher.config.json")
 const { assignId } = contentPublisher
 const RID = "6f6903e3-2b0e-4b66-9d5a-12f0e6b9d62b"
 const PRIVATE_SENTINEL = "PRIVATE_MVP_SENTINEL_71f284b5"
@@ -30,6 +30,7 @@ async function fixture(t) {
   config.source.root = "."
   config.source.publishAll = false
   config.attachments.allowedLocalRoots = ["assets"]
+  config.attachments.localImages.onMissing = "error"
   await fs.writeFile(path.join(root, "publishing", "config.json"), `${JSON.stringify(config, null, 2)}\n`)
   t.after(async () => fs.rm(root, { recursive: true, force: true }))
   return root

@@ -3,23 +3,16 @@ import { randomUUID } from "node:crypto"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { fileURLToPath, pathToFileURL } from "node:url"
+import { fileURLToPath } from "node:url"
 
 import { slugTag } from "@quartz-community/utils"
 import { parse } from "yaml"
+import * as bundledPublisher from "./publisher.mjs"
 
 const SITE_DIR = path.dirname(fileURLToPath(import.meta.url))
 const REPOSITORY_ROOT = path.dirname(SITE_DIR)
 const PINNED_PLUGIN_VERSION = "0.1.0"
 const RID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-async function loadContentPublisher(contentRoot) {
-  const publisherPath = path.join(contentRoot, "publishing", "publisher.mjs")
-  if (!(await pathExists(publisherPath))) {
-    throw new Error(`Content publisher is missing: ${publisherPath}`)
-  }
-  return import(`${pathToFileURL(publisherPath).href}?content=${Date.now()}`)
-}
-
 function isInside(parent, candidate) {
   const relative = path.relative(path.resolve(parent), path.resolve(candidate))
   return relative !== "" && !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative)
@@ -460,7 +453,7 @@ export async function buildSite(contentRootInput, options = {}) {
   if (!contentRootInput) throw new Error("Content repository path is required")
   const contentRoot = path.resolve(contentRootInput)
   const outputRoot = path.resolve(options.outputRoot ?? REPOSITORY_ROOT)
-  const publisher = options.publisher ?? await loadContentPublisher(contentRoot)
+  const publisher = options.publisher ?? bundledPublisher
   const transactionId = randomUUID()
   const workRoot = assertManagedPath(
     os.tmpdir(),

@@ -23,6 +23,8 @@ npm.cmd test
 npm.cmd run build:site
 ```
 
-构建产物位于 `public/`。内容仓库必须包含 `publishing/publisher.mjs`、
-`publishing/config.json` 和有效的 RID 注册表。
+构建产物位于 `public/`。内容仓库只需提供 `clips/` 下带有有效 `rid`、`permalink`
+元数据的 Markdown；发布器与机器配置由本展示仓库维护。
 
+仍引用未同步本地附件的笔记会被本次构建隔离并产生 `W_NOTE_QUARANTINED`，不会阻断
+其他完整内容，也不会把失效附件路径发布到站点。

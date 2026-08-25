@@ -1,0 +1,158 @@
+{
+  "contractVersion": 1,
+  "source": {
+    "root": "clips",
+    "publishAll": true,
+    "exclude": [
+      ".codex/**",
+      ".git/**",
+      ".obsidian/**",
+      ".publish-stage/**",
+      ".video-sum-cache/**",
+      ".video-sum-temp/**",
+      ".video-sum-work/**",
+      "clips/assets/**",
+      "node_modules/**",
+      "publishing/**",
+      "public/**",
+      "public.tmp-*/**",
+      "public.backup-*/**",
+      "site/**",
+      "README.md"
+    ]
+  },
+  "frontmatter": {
+    "publishField": "publish",
+    "publishedValueType": "boolean",
+    "publishedValue": true,
+    "ridField": "rid",
+    "permalinkField": "permalink",
+    "publicUrlField": "webClipUrl",
+    "pdfField": "pdf"
+  },
+  "rid": {
+    "format": "uuid-v4",
+    "case": "lower",
+    "length": 36,
+    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    "generator": "system-csprng",
+    "assignmentMode": "explicit",
+    "immutable": true,
+    "reusable": false
+  },
+  "routes": {
+    "publicBaseUrl": "https://l4place0.github.io/web-clips-publish",
+    "pagePattern": "/r/{rid}",
+    "rawPattern": "/raw/{rid}.md",
+    "postMvpPdfPattern": "/pdf/{rid}.pdf",
+    "canonicalTrailingSlash": false,
+    "permalinkMode": "derived-required"
+  },
+  "state": {
+    "registry": "publishing/registry.json",
+    "manifest": "publishing/manifest.json",
+    "registryMode": "append-only",
+    "retireOnUnpublish": true,
+    "retireOnSourceDelete": true
+  },
+  "staging": {
+    "root": ".publish-stage",
+    "quartzContentPattern": "quartz/content/r/{rid}.md",
+    "rawPattern": "raw/{rid}.md",
+    "assetPattern": "quartz/content/assets/{rid}/{assetPath}",
+    "cleanBuild": true
+  },
+  "quartzAdapter": {
+    "canonicalRouteSource": "staged-file-path",
+    "stripFrontmatterFields": [
+      "permalink"
+    ],
+    "pageOutputPattern": "public/r/{rid}.html",
+    "rawOutputPattern": "public/raw/{rid}.md",
+    "rawContentType": "text/markdown; charset=utf-8"
+  },
+  "attachments": {
+    "allowedLocalRoots": [
+      "clips/assets"
+    ],
+    "localImages": {
+      "enabled": true,
+      "copyReferencedOnly": true,
+      "publicPattern": "/assets/{rid}/{assetPath}",
+      "frontmatterFields": [
+        "cover"
+      ],
+      "extensions": [
+        ".avif",
+        ".gif",
+        ".jpeg",
+        ".jpg",
+        ".png",
+        ".webp"
+      ],
+      "resolveCaseExactly": true,
+      "onMissing": "quarantine",
+      "onEscape": "error",
+      "onAmbiguous": "error"
+    },
+    "remoteImages": {
+      "schemes": [
+        "http",
+        "https"
+      ],
+      "mode": "preserve",
+      "diagnostic": "W_REMOTE_ASSET"
+    },
+    "noteEmbeds": {
+      "mode": "deny",
+      "diagnostic": "E_PRIVATE_EMBED"
+    },
+    "pdf": {
+      "enabled": false,
+      "shape": {
+        "path": "repository-relative path under an allowed local root",
+        "title": "optional string"
+      },
+      "maxPerNote": 1,
+      "extension": ".pdf",
+      "postMvpBackend": "aliyun-oss",
+      "disabledDiagnostic": "E_FEATURE_DISABLED"
+    }
+  },
+  "features": {
+    "pdf": false,
+    "oss": false
+  },
+  "diagnostics": {
+    "warningsFailBuild": false,
+    "exitCodes": {
+      "success": 0,
+      "contractOrUsage": 2,
+      "contentValidation": 3,
+      "filesystemOrStaging": 4,
+      "internal": 5
+    },
+    "errors": [
+      "E_CONFIG_INVALID",
+      "E_FRONTMATTER_PARSE",
+      "E_PUBLISH_TYPE",
+      "E_RID_MISSING",
+      "E_RID_INVALID",
+      "E_RID_DUPLICATE",
+      "E_RID_REUSED",
+      "E_PERMALINK_MISSING",
+      "E_PERMALINK_MISMATCH",
+      "E_ATTACHMENT_MISSING",
+      "E_ATTACHMENT_ESCAPE",
+      "E_ATTACHMENT_TYPE",
+      "E_ATTACHMENT_AMBIGUOUS",
+      "E_PRIVATE_EMBED",
+      "E_FEATURE_DISABLED"
+    ],
+    "warnings": [
+      "W_REMOTE_ASSET",
+      "W_PRIVATE_LINK",
+      "W_NOTE_QUARANTINED"
+    ]
+  }
+}

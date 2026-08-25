@@ -3,13 +3,13 @@ import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import test from "node:test"
-import { fileURLToPath, pathToFileURL } from "node:url"
+import { fileURLToPath } from "node:url"
 
 import { buildSite } from "./build.mjs"
+import * as contentPublisher from "./publisher.mjs"
 
 const CONTENT_REPO_ROOT = process.env.WEB_CLIPS_CONTENT_ROOT
 if (!CONTENT_REPO_ROOT) throw new Error("WEB_CLIPS_CONTENT_ROOT is required for site tests")
-const contentPublisher = await import(pathToFileURL(path.join(CONTENT_REPO_ROOT, "publishing", "publisher.mjs")))
 const { assignId } = contentPublisher
 
 const RID = "5d3b8f6e-19c4-4c62-9a71-2f0e8d7b6c45"
@@ -46,11 +46,12 @@ test("production pipeline publishes only the staged closure with stable routes",
 
   await fs.mkdir(path.join(fixture, "publishing"), { recursive: true })
   const config = JSON.parse(
-    await fs.readFile(path.join(CONTENT_REPO_ROOT, "publishing", "config.json"), "utf8"),
+    await fs.readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), "publisher.config.json"), "utf8"),
   )
   config.source.root = "."
   config.source.publishAll = false
   config.attachments.allowedLocalRoots = ["assets"]
+  config.attachments.localImages.onMissing = "error"
   await fs.writeFile(
     path.join(fixture, "publishing", "config.json"),
     `${JSON.stringify(config, null, 2)}\n`,
@@ -158,4 +159,63 @@ ${PRIVATE_SENTINEL}
   const tagText = (await Promise.all(tagFiles.map((file) => fs.readFile(file, "utf8")))).join("\n")
   assert.match(tagText, /中文标签/)
   assert.match(tagText, /中文公开笔记/)
+})
+
+test("production quarantine omits notes with unavailable local assets", async (t) => {
+  const fixture = await fs.mkdtemp(path.join(os.tmpdir(), "web-clips-quarantine-"))
+  t.after(async () => fs.rm(fixture, { recursive: true, force: true }))
+
+  await fs.mkdir(path.join(fixture, "publishing"), { recursive: true })
+  const config = JSON.parse(
+    await fs.readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), "publisher.config.json"), "utf8"),
+  )
+  config.source.root = "."
+  config.source.publishAll = false
+  config.attachments.allowedLocalRoots = ["assets"]
+  await fs.writeFile(path.join(fixture, "publishing", "config.json"), `${JSON.stringify(config, null, 2)}\n`)
+
+  const safeRid = "4cb1ad89-7d36-4fe4-a8e1-1b5fb2c45277"
+  const quarantinedRid = "aac8d01d-79d3-46c0-b476-daf19dc1ff5b"
+  const quarantinedSentinel = "QUARANTINED_BODY_MUST_NOT_PUBLISH"
+  await write(fixture, "完整.md", `---
+title: 完整内容
+publish: true
+rid: ${safeRid}
+permalink: /r/${safeRid}
+---
+
+# 完整内容
+
+可以安全发布。
+
+[不随站点发布的本地数据](assets/private-data.json)
+`)
+  await write(fixture, "附件缺失.md", `---
+title: 附件缺失内容
+publish: true
+rid: ${quarantinedRid}
+permalink: /r/${quarantinedRid}
+---
+
+# 附件缺失内容
+
+${quarantinedSentinel}
+
+![缺失](assets/not-synced.png)
+`)
+
+  const validation = await contentPublisher.validate(fixture)
+  assert.equal(validation.ok, true)
+  assert.equal(validation.publishedCount, 1)
+  assert.equal(validation.quarantinedCount, 1)
+  assert.equal(validation.diagnostics.some((item) => item.code === "W_NOTE_QUARANTINED"), true)
+
+  const result = await buildSite(fixture, { outputRoot: fixture, publisher: contentPublisher })
+  assert.equal(result.published, 1)
+  assert.equal(await fs.stat(path.join(fixture, "public", "r", `${safeRid}.html`)).then(() => true), true)
+  assert.equal(await fs.access(path.join(fixture, "public", "r", `${quarantinedRid}.html`)).then(() => true, () => false), false)
+  const index = await fs.readFile(path.join(fixture, "public", "static", "contentIndex.json"), "utf8")
+  assert.doesNotMatch(index, new RegExp(quarantinedSentinel))
+  const safePage = await fs.readFile(path.join(fixture, "public", "r", `${safeRid}.html`), "utf8")
+  assert.doesNotMatch(safePage, /assets\/private-data\.json/)
 })
